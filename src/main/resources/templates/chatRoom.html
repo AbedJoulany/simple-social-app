@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>Users</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css" integrity="sha384-5sAR7xN1Nv6T6+dT2mhtzEpVJvfS3NScPQTrOxhwjIuvcA67KV2R5Jz6kr4abQsz" crossorigin="anonymous">
+</head>
+<body>
+
+<div>
+    <form action="#" th:action="@{/logout}" th:object="${currentUser}" method="post"><input type="hidden" name="userName" th:value="${currentUser.userName}">
+        <input class="btn btn-primary m-5" type="submit" value="logout" /></form>
+</div>
+
+<div class=" container alert alert-secondary" role="alert">
+    <h1 class="m-5" th:text="'Welcome '+ ${currentUser.getUserName()}"></h1>
+
+    <form action="/sendMessage" method="post">
+        <p>type you message to send.</p>
+        <hr>
+        <div>
+            <input type="text" class="form-control mb-3" id="message" name="message" placeholder="write your message"
+                   aria-label="message">
+
+            <input type="hidden" class="form-control mb-3" id="userName" name="userName" th:value="${currentUser.getUserName()}" aria-label="userId">
+        </div>
+
+        <div class="buttons">
+            <button type="submit" id="submit-button" class="btn btn-primary mb-3">send</button>
+        </div>
+    </form>
+
+</div>
+<div class="container">
+<div class="row" id = "data"></div>
+
+    <div class="row alert alert-secondary">
+        <form class ="col-md-6">
+            <div>
+                <input type="text" class="form-control mb-3" id="text" name="text"
+                       placeholder="Type a User name or a text"
+                       aria-label="text">
+            </div>
+
+            <div class="buttons">
+                <button type="button" id="user-button" class="btn btn-primary mb-3">Search by Name</button>
+                <button type="button" id="text-button" class="btn btn-primary mb-3">Search by text</button>
+            </div>
+        </form>
+
+        <div class ="col-md-6" id = "search-data">
+
+        </div>
+
+    </div>
+
+<div class="row" id ="active-users">
+    <div th:switch="${users}" class="col-md-6">
+        <h2 th:case="null">No users yet!</h2>
+        <div th:case="*">
+            <h2 class="my-5">Active Users</h2>
+            <table class="table table-striped table-responsive-md">
+                <thead>
+                <tr>
+                    <th>User Name</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="user : ${users}">
+                    <td th:text="${user.userName}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+</div>
+<script>
+    (function () {
+        document.addEventListener('DOMContentLoaded', function () {
+            getLast5Messages();
+            getActiveUsers();
+            window.setInterval(getLast5Messages, 10000)
+            window.setInterval(getActiveUsers, 10000)
+            document.getElementById("user-button").addEventListener("click", getByUserName);
+            document.getElementById("text-button").addEventListener("click", getByText);
+            //document.getElementById("getit").addEventListener("click", getLast5Messages);
+        });
+    })();
+
+    function getLast5Messages (){
+        fetch("/json", {
+            method:"post",
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(res => res.json())
+            .then(resp => {
+
+                res = "<table class=\"table table-secondary table-hover\">"+
+                    "<thead>" +
+                    "<tr>" +
+                    "<th scope=\"col\">#</th>" +
+                    "<th scope=\"col\">User name</th>" +
+                    "<th scope=\"col\">Message</th>"+
+                    "<tr> <thead><tbody>";
+                let i = 1;
+                for (el of resp) {
+                    res = res+
+                        "<tr> <th scope=\"row\">"+ (i++) +"</th>" +
+                        "<td>"+el.userName+"</td>" +
+                        "<td>"+el.message+"</td></tr>"
+                    //res = res + "<br/>" + el.userName + " ( " + el.message + " )";
+                }
+                res = res + "</tbody></table>";
+                document.getElementById("data").innerHTML = res;
+            })
+            .catch(e => {
+                document.getElementById("data").innerHTML = "Some error occured!";
+            });
+    }
+
+    function getActiveUsers(){
+        fetch("/getActiveUsers", {
+            method:"post",
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(res => res.json())
+            .then(resp => {
+
+                res ="<div class=\"col-md-6\">" +
+                    "<h2 class=\"my-5\">Active Users</h2>"+
+                    "<table class=\"table table-striped table-responsive-md\">"+
+                    "<thead>" +
+                    "<tr>" +
+                    "<th scope=\"col\">User name</th>" +
+                    "<tr> <thead><tbody>";
+                for (el of resp) {
+                    res = res+
+                        "<tr> <th scope=\"row\">"+el.userName+"</th>" +
+                        //"<td>"+el.userName+"</td>" +
+                        "</tr>"
+                }
+                res = res + "</tbody></table></div>";
+                document.getElementById("active-users").innerHTML = res;
+            })
+            .catch(e => {
+                document.getElementById("active-users").innerHTML = "Some error occured!";
+            });
+    }
+
+    function getJson(url) {
+        fetch(url, {
+            method:"Post",
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(res => res.json())
+            .then(resp => {
+                console.log(resp);
+                res = "<table class=\"table table-secondary table-hover\">" +
+                    "<thead>" +
+                    "<tr>" +
+                    "<th scope=\"col\">#</th>" +
+                    "<th scope=\"col\">User name</th>" +
+                    "<th scope=\"col\">Message</th>" +
+                    "<tr> <thead><tbody>";
+                let i = 1;
+                for (el of resp) {
+                    res = res +
+                        "<tr> <th scope=\"row\">" + (i++) + "</th>" +
+                        "<td>" + el.userName + "</td>" +
+                        "<td>" + el.message + "</td></tr>"
+                    //res = res + "<br/>" + el.userName + " ( " + el.message + " )";
+                }
+                res = res + "</tbody></table>";
+                document.getElementById("search-data").innerHTML = res;
+            })
+            .catch(e => {
+                document.getElementById("search-data").innerHTML = "Some error occured!";
+            });
+    }
+
+    function getByUserName(){
+        getJson("/searchByUser/"+document.getElementById("text").value)
+    }
+    function getByText(){
+        getJson("searchByText/"+document.getElementById("text").value)
+    }
+
+
+</script>
+
+</body>
+</html>

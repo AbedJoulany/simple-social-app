@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>Add User</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+            integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+            crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js"
+            integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+            crossorigin="anonymous"></script>
+    <script src="https://cdn.rtlcss.com/bootstrap/v4.2.1/js/bootstrap.min.js"
+            integrity="sha384-a9xOd0rz8w0J8zqj1qJic7GPFfyMfoiuDjC9rqXlVOcGO/dmRqzMn34gZYDTel8k"
+            crossorigin="anonymous"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css" integrity="sha384-5sAR7xN1Nv6T6+dT2mhtzEpVJvfS3NScPQTrOxhwjIuvcA67KV2R5Jz6kr4abQsz" crossorigin="anonymous">
+</head>
+<body>
+<div class="alert alert-light" role="alert">
+    <h3>link to my <a href="../static/readme.html" class="alert-link" target="_blank">README</a></h3>
+</div>
+
+<div class=" container alert alert-secondary" role="alert">
+
+    <form action="#" th:action="@{/chatRoom}" th:object="${user}" method="post">
+        <h1>Enter User name</h1>
+        <p>Please fill in this form to login into chat room.</p>
+        <hr>
+        <div>
+            <input type="text"  th:field="*{userName}"  class="form-control mb-3" id="userName" placeholder="Enter user name"
+                   aria-label="userName">
+            <span th:if="${#fields.hasErrors('userName')}" th:errors="*{userName}" class="text-danger"></span>
+            <div th:text="${errorMessage}" th:class="${errorMessageType}"></div>
+        </div>
+<!--        <div>-->
+<!--            <input type="hidden" th:field="*{isActive}" class="form-control" id="isActive"  value="{true">-->
+<!--            <span th:if="${#fields.hasErrors('isActive')}" th:errors="*{isActive}" class="text-danger"></span>-->
+<!--        </div>-->
+
+        <div class="buttons">
+            <button type="submit" id="submit-button" class="btn btn-primary mb-3">Login</button>
+        </div>
+    </form>
+</div>
+
+<div class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" id="errors-modal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Correct the following problems</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="error-body"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+</div>
+
+
+<script>
+        document.addEventListener('DOMContentLoaded',  (event) => {
+            document.getElementById("submit-button").addEventListener("click", function (event) {
+                let errorList = [];
+
+                /* building the errors list to show on page
+               Arguments: none.
+               Returns: a string with the error, an empty string if no errors.
+                */
+                let buildErrorList = function () {
+                    let res = ''
+                    errorList.forEach(e => {
+                        res += `<p>${e}</p>`;
+                    })
+                    return res;
+                }
+
+                let isEmpty = function (str) {
+                    return str.trim() !== '';
+                }
+
+                let validateText = function (url) {
+                    if (!isEmpty(url)) {
+                        errorList.push("text input is empty please type a user name.")
+                        return false;
+                    }
+                    return true;
+                }
+
+                const text = validateText(document.getElementById("userName").value);
+                if (!text) {
+                    event.preventDefault();
+                    document.getElementById('error-body').innerHTML = buildErrorList();
+                    $("#errors-modal").modal("show");
+                    errorList = [];
+                }
+            });
+        });
+
+
+</script>
+</body>
+</html>
